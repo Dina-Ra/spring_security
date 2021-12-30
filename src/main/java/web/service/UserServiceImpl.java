@@ -4,15 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import web.dao.UserDao;
-import web.dao.UserDaoHibernateImpl;
+import web.model.Role;
 import web.model.User;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService{
 
     private UserDao daoHibernate;
 
@@ -23,7 +25,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void addUser(User user) {
+    public void addUser(User user, String[] roles) {
+        user.setRoles(getSetRoles(roles));
         daoHibernate.addUser(user);
     }
 
@@ -42,7 +45,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void updateUser(User user, long id) {
+    public void updateUser(User user, long id, String[] roles) {
+        user.setRoles(getSetRoles(roles));
         daoHibernate.updateUser(user, id);
     }
 
@@ -50,5 +54,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(long id){
         return daoHibernate.getUser(id);
+    }
+
+    @Transactional
+    @Override
+    public User getUser(String name) {
+        return daoHibernate.getUser(name);
+    }
+
+    private Set<Role> getSetRoles (String[] roles) {
+        Set<Role> setRoles = new HashSet<>();
+        for (String role : roles) {
+            setRoles.add(new Role((role.equals("ADMIN") ? 1L : 2l), "ROLE_" + role));
+        }
+        return setRoles;
     }
 }
